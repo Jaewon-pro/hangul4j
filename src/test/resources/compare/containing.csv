@@ -1,0 +1,7 @@
+text,substring,result
+오늘도 날이 밝구나,ㅗ늘ㄷ,true
+도우미,도움,true
+그는 빅브라더를 사랑했다,덜,true
+"오늘 엄마가 죽었다. 아니, 어쩌면 어제였는지도 모른다",hier,false
+"В пять часов утра, как всегда.",시,false
+"Bien sûr, 어서 오세요",옷,true
