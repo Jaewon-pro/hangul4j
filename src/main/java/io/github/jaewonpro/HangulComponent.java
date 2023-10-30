@@ -1,8 +1,9 @@
-package com.github.jaewonpro;
+package io.github.jaewonpro;
 
+import java.util.Comparator;
 import java.util.Objects;
 
-public class HangulComponent {
+final class HangulComponent implements Comparable<HangulComponent> {
 
     private static final char HANGUL_UNICODE_BEGIN = '가';
     private static final char HANGUL_UNICODE_END = '힣';
@@ -31,13 +32,13 @@ public class HangulComponent {
 
 
     public static HangulComponent of(final char unicodeValue) {
-        if (!isValidHangulInUnicode(unicodeValue)) {
-            throw new IllegalArgumentException("한글이 아닌 unicode 입니다! actual: " + unicodeValue);
+        if (!isCompleteHangulInUnicode(unicodeValue)) {
+            throw new IllegalArgumentException("올바른 한글이 아닌 unicode 입니다! actual: " + unicodeValue);
         }
         return new HangulComponent(unicodeValue);
     }
 
-    public static boolean isValidHangulInUnicode(final char unicode) {
+    public static boolean isCompleteHangulInUnicode(final char unicode) {
         return HANGUL_UNICODE_BEGIN <= unicode && unicode <= HANGUL_UNICODE_END;
     }
 
@@ -76,6 +77,44 @@ public class HangulComponent {
     @Override
     public int hashCode() {
         return Objects.hash(begin, middle, end);
+    }
+
+    @Override
+    public int compareTo(final HangulComponent o) {
+        return byBegin.thenComparing(byMiddle).thenComparing(byEnd).compare(this, o);
+    }
+
+    public static final Comparator<HangulComponent> byBegin = Comparator
+            .comparing(h -> h.begin);
+
+    public static final Comparator<HangulComponent> byMiddle = Comparator
+            .comparing(h -> h.middle);
+
+    public static final Comparator<HangulComponent> byEnd = Comparator
+            .comparing(h -> h.end);
+
+
+    public boolean contains(final char unicode) {
+        if (isBeginConsonant(unicode)) {
+            return this.begin == unicode;
+        }
+        if (!isCompleteHangulInUnicode(unicode)) {
+            return false;
+        }
+        return contains(HangulComponent.of(unicode));
+    }
+
+    public boolean contains(final HangulComponent subHangul) {
+        return this.toString().contains(subHangul.toString());
+    }
+
+    public boolean isEndsWithConsonant() {
+        return end != EMPTY_CHAR;
+    }
+
+
+    private boolean isBeginConsonant(final char unicode) {
+        return BEGIN_LIST[0] <= unicode && unicode <= BEGIN_LIST[BEGIN_LIST.length - 1];
     }
 
 

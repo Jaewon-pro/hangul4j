@@ -1,4 +1,4 @@
-import com.github.jaewonpro.HangulUtils;
+import io.github.jaewonpro.HangulUtils;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.converter.ConvertWith;
 import org.junit.jupiter.params.provider.CsvFileSource;
@@ -12,7 +12,7 @@ class HangulUtilsDisassembleTest {
     @ParameterizedTest
     @CsvFileSource(files = "src/test/resources/disassemble/text-to-string.csv", numLinesToSkip = 1)
     void givenText_whenDissemble_returnDisassembleString(String input, String expected) {
-        final String actual = HangulUtils.disassembleAsString(input);
+        final String actual = HangulUtils.disassembleToString(input);
         assertThat(actual).isEqualTo(expected);
     }
 
@@ -29,7 +29,7 @@ class HangulUtilsDisassembleTest {
     @ParameterizedTest
     @CsvFileSource(files = "src/test/resources/disassemble/character-to-string.csv", numLinesToSkip = 1)
     void givenChar_whenDissemble_returnDisassembledString(char input, String expected) {
-        final String actual = HangulUtils.disassembleAsString(input);
+        final String actual = HangulUtils.disassembleToString(input);
         assertThat(actual).isEqualTo(expected);
     }
 
@@ -42,6 +42,5 @@ class HangulUtilsDisassembleTest {
         final List<Character> actual = HangulUtils.disassemble(input);
         assertThat(actual).isEqualTo(expected);
     }
-
 
 }
