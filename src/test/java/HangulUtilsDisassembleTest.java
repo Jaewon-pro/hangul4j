@@ -12,7 +12,7 @@ class HangulUtilsDisassembleTest {
     @ParameterizedTest
     @CsvFileSource(files = "src/test/resources/disassemble/text-to-string.csv", numLinesToSkip = 1)
     void givenText_whenDissemble_returnDisassembleString(String input, String expected) {
-        final String actual = HangulUtils.disassembleToString(input);
+        final String actual = HangulUtils.disassemble(input);
         assertThat(actual).isEqualTo(expected);
     }
 
@@ -22,14 +22,14 @@ class HangulUtilsDisassembleTest {
             String input,
             @ConvertWith(SplitByCommaConverter.class) List<Character> expected
     ) {
-        final List<Character> actual = HangulUtils.disassemble(input);
+        final List<Character> actual = HangulUtils.disassembleToList(input);
         assertThat(actual).isEqualTo(expected);
     }
 
     @ParameterizedTest
     @CsvFileSource(files = "src/test/resources/disassemble/character-to-string.csv", numLinesToSkip = 1)
     void givenChar_whenDissemble_returnDisassembledString(char input, String expected) {
-        final String actual = HangulUtils.disassembleToString(input);
+        final String actual = HangulUtils.disassemble(input);
         assertThat(actual).isEqualTo(expected);
     }
 
@@ -39,7 +39,7 @@ class HangulUtilsDisassembleTest {
             char input,
             @ConvertWith(SplitByCommaConverter.class) List<Character> expected
     ) {
-        final List<Character> actual = HangulUtils.disassemble(input);
+        final List<Character> actual = HangulUtils.disassembleToList(input);
         assertThat(actual).isEqualTo(expected);
     }
 

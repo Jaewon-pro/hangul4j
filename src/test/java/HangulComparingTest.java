@@ -37,4 +37,14 @@ class HangulComparingTest {
         assertThat(actual).isEqualTo(expected);
     }
 
+    @ParameterizedTest
+    @CsvFileSource(files = "src/test/resources/compare/text-end-consonant-with-latin.csv", numLinesToSkip = 1)
+    void givenText_whenCheckEndWithLatin_returnResult(
+            final String input,
+            final boolean expected
+    ) {
+        final boolean actual = HangulUtils.isEndsWithConsonantWithLatin(input);
+        assertThat(actual).isEqualTo(expected);
+    }
+
 }
