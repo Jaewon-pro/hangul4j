@@ -1,18 +1,23 @@
 plugins {
-    id 'java'
+    id 'java-library'
+    id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
+    // https://docs.gradle.org/current/userguide/publishing_maven.html
     id 'maven-publish'
+    id 'signing'
 }
 
-group = 'com.github.jaewon-pro'
-version = '1.0-SNAPSHOT'
+group = 'io.github.jaewon-pro'
+version = '0.1.0'
 
 java {
-    sourceCompatibility = '1.8'
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+    withSourcesJar()
+    withJavadocJar()
 }
 
 repositories {
     mavenCentral()
-    jcenter()
 }
 
 dependencies {
@@ -24,4 +29,99 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+
+def pomConfig = {
+    licenses {
+        license {
+            name "MIT License"
+            url "http://www.opensource.org/licenses/mit-license.php"
+        }
+    }
+    developers {
+        developer {
+            id "jaewon"
+            name "Jaewon Lee"
+            email "jaewonlee.pro@gmail.com"
+            organization "Github"
+            organizationUrl "https://github.com"
+        }
+    }
+    scm {
+        connection "scm:git:git://github.com/Jaewon-pro/hangul4j.git"
+        developerConnection "scm:git:ssh://github.com:Jaewon-pro/hangul4j.git"
+        url "https://github.com/Jaewon-pro/hangul4j"
+    }
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+
+//nexusPublishing {
+//    repositories {
+//        sonatype {
+//            //assigning from the 'gradle.properties' files
+//            username = project.property("ossrhUsername")
+//            password = project.property("ossrhPassword")
+//        }
+//    }
+//}
+
+publishing {
+    publications {
+        MyPublication(MavenPublication) {
+            from components.java
+
+//            artifact("$buildDir/libs/${project.getName()}-${version}.jar")
+//            artifact sourcesJar
+//            artifact javadocJar
+
+            groupId 'io.github.jaewon-pro'
+            artifactId "${project.getName()}"
+            version '0.1.0'
+
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('description', 'Hangul util for Java')
+                root.appendNode('name', 'hangul4j')
+                root.appendNode('url', 'https://github.com/jaewon-pro/hangul4j')
+                root.appendNode('packaging', "$buildDir/libs/${project.getName()}-${version}.jar")
+                root.children().last() + pomConfig
+            }
+        }
+    }
+
+    // https://docs.gradle.org/current/userguide/publishing_maven.html
+    repositories {
+        maven {
+            name = "sonatypeRepository"
+            // change URLs to point to your repos, e.g. http://my.org/repo
+            def releasesRepoUrl = layout.buildDirectory.dir('${nexusUrl}/content/repositories/releases')
+            def snapshotsRepoUrl =  layout.buildDirectory.dir('${nexusUrl}/content/repositories/snapshots')
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+        }
+    }
+}
+
+
+nexusPublishing {
+    repositories {
+        sonatype {
+            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+            packageGroup = 'io.github.jaewon-pro'
+            stagingProfileId = project.property("sonatypeStagingProfileId")
+            username = project.property("ossrhUsername")
+            password = project.property("ossrhPassword")
+        }
+    }
+}
+
+
+signing {
+    // 'MyPublication' is the name of the publication above
+    sign publishing.publications.MyPublication
 }
