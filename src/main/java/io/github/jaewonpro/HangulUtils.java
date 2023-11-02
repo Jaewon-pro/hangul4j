@@ -9,10 +9,40 @@ import static java.util.stream.Collectors.toList;
 public final class HangulUtils {
 
     /**
+     * <p>
+     * 한글을 초성, 중성, 종성으로 분해한 결과를 반환<br>
+     * e.g. 샛별 -> ㅅㅐㅅㅂㅕㄹ
+     * </p>
+     *
+     * @param text 분해할 문자열
+     * @return 분해된 문자열
+     */
+    public static String disassemble(final String text) {
+        return disassembleToCharSequence(text).toString();
+    }
+
+    /**
+     * <p>
+     * 한글을 초성, 중성, 종성으로 분해한 결과를 반환<br>
+     * e.g. 별 -> ㅂㅕㄹ
+     * </p>
+     *
+     * @param unicodeValue 분해할 문자
+     * @return 분해된 한글 문자열
+     */
+    public static String disassemble(final char unicodeValue) {
+        if (!isCompleteHangulInUnicode(unicodeValue)) {
+            return String.valueOf(unicodeValue);
+        }
+
+        return HangulComponent.of(unicodeValue).toString();
+    }
+
+    /**
      * Disassemble the Korean Hangul characters within the provided text.
      *
-     * @param text - A text to disassemble
-     * @return - The list of disassembled characters; other characters will remain intact.
+     * @param text A text to disassemble
+     * @return The list of disassembled characters; other characters will remain intact.
      */
     public static List<Character> disassembleToList(final String text) {
         return text.chars()
@@ -34,32 +64,13 @@ public final class HangulUtils {
                 .collect(joining());
     }
 
-    /**
-     * <p>
-     * 한글들은 초성, 중성, 종성으로 분해한 결과를 반환하는 함수
-     * </p>
-     * @param text - 분해할 문자열
-     * @return
-     */
-    public static String disassemble(final String text) {
-        return disassembleToCharSequence(text).toString();
-    }
-
-    public static String disassemble(final char unicodeValue) {
-        if (!isCompleteHangulInUnicode(unicodeValue)) {
-            return String.valueOf(unicodeValue);
-        }
-
-        return HangulComponent.of(unicodeValue).toString();
-    }
-
 
     /**
      * 문자열에 다른 문자열이 포함되는지 반환
      *
-     * @param text      - 전체 문자열
-     * @param substring - 찾을 문자열
-     * @return - 포함하는지 여부
+     * @param text      전체 문자열
+     * @param substring 찾을 문자열
+     * @return 포함하는지 여부
      */
     public static boolean contains(final String text, final String substring) {
         if (text.length() < substring.length()) {
@@ -69,17 +80,14 @@ public final class HangulUtils {
             return true;
         }
 
-        String disassembledText = disassemble(text);
-        String disassembledSubstring = disassemble(substring);
-
-        return disassembledText.contains(disassembledSubstring);
+        return disassemble(text).contains(disassemble(substring));
     }
 
     /**
      * 자음으로 끝나는 문자열인지 반환, 완성형 한글이 아닐 경우, false를 반환
      *
-     * @param text - 판단할 문자열
-     * @return - 자음으로 끝나는지 여부
+     * @param text 판단할 문자열
+     * @return 자음으로 끝나는지 여부
      */
     public static boolean isEndsWithConsonant(final String text) {
         final char lastUnicode = text.charAt(text.length() - 1);
@@ -89,8 +97,8 @@ public final class HangulUtils {
     /**
      * 자음으로 끝나는 글자인지 반환, 완성형 한글이 아닐 경우, false를 반환
      *
-     * @param unicode - 판단할 문자
-     * @return - 주어진 {@code unicode}가 자음으로 끝나는지 여부
+     * @param unicode 판단할 문자
+     * @return 주어진 {@code unicode}가 자음으로 끝나는지 여부
      */
     public static boolean isEndsWithConsonant(final char unicode) {
         if (!isCompleteHangulInUnicode(unicode)) {
@@ -107,8 +115,8 @@ public final class HangulUtils {
      * a, e, i, o, u만 모음으로 판단<br>
      * </p>
      *
-     * @param unicode - 판단할 문자
-     * @return - 주어진 {@code unicode}가 자음으로 끝나는지 여부
+     * @param unicode 판단할 문자
+     * @return 주어진 {@code unicode}가 자음으로 끝나는지 여부
      */
     public static boolean isEndsWithConsonantWithLatin(final char unicode) {
         if (Alphabet.isAlphabet(unicode) && Alphabet.isConsonant(unicode)) {
@@ -123,8 +131,8 @@ public final class HangulUtils {
      * a, e, i, o, u만 모음으로 판단<br>
      * </p>
      *
-     * @param text - 판단할 문자열
-     * @return - 주어진 {@code text}가 자음으로 끝나는지 여부
+     * @param text 판단할 문자열
+     * @return 주어진 {@code text}가 자음으로 끝나는지 여부
      */
     public static boolean isEndsWithConsonantWithLatin(final String text) {
         final char lastUnicode = text.charAt(text.length() - 1);
@@ -137,8 +145,8 @@ public final class HangulUtils {
      * e.g) 한 -> {@code true}, ㅚ -> {@code false}, a -> {@code false}
      * </p>
      *
-     * @param unicode - 판단할 문자
-     * @return - 주어진 {@code unicode}가 완성형 한글인지 반환
+     * @param unicode 판단할 문자
+     * @return 주어진 {@code unicode}가 완성형 한글인지 반환
      */
     public static boolean isCompleteHangulInUnicode(final char unicode) {
         return HangulComponent.isCompleteHangulInUnicode(unicode);
@@ -150,8 +158,8 @@ public final class HangulUtils {
      * 완성형 한글이 아니라 초성으로 만들수 없는 경우, 그대로 반환
      * </p>
      *
-     * @param unicode - 변환할 문자
-     * @return - 주어진 {@code unicode}가 초성으로 된 결과
+     * @param unicode 변환할 문자
+     * @return 주어진 {@code unicode}가 초성으로 된 결과
      */
     public static char toOnlyBeginConsonant(final char unicode) {
         if (!isCompleteHangulInUnicode(unicode)) {
@@ -167,8 +175,8 @@ public final class HangulUtils {
      * 완성형 한글이 아니라 초성으로 만들수 없는 경우, 그대로 반환
      * </p>
      *
-     * @param text - 변환할 문자열
-     * @return - 주어진 {@code text}가 초성으로 변환된 문자열
+     * @param text 변환할 문자열
+     * @return 주어진 {@code text}가 초성으로 변환된 문자열
      */
     public static String toOnlyBeginConsonant(final String text) {
         return text.chars()
