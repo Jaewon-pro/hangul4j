@@ -1,8 +1,9 @@
 package io.github.jaewonpro;
 
 import java.util.List;
-import java.util.stream.Stream;
+import java.util.stream.IntStream;
 
+import static io.github.jaewonpro.Alphabet.isAlphabet;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
@@ -27,15 +28,15 @@ public final class HangulUtils {
      * e.g. 별 -> ㅂㅕㄹ
      * </p>
      *
-     * @param unicodeValue 분해할 문자
+     * @param codePoint 분해할 문자
      * @return 분해된 한글 문자열
      */
-    public static String disassemble(final char unicodeValue) {
-        if (!isCompleteHangulInUnicode(unicodeValue)) {
-            return String.valueOf(unicodeValue);
+    public static String disassemble(final char codePoint) {
+        if (!isCompleteHangulInUnicode(codePoint)) {
+            return String.valueOf(codePoint);
         }
 
-        return HangulComponent.of(unicodeValue).toString();
+        return HangulComponent.of(codePoint).toString();
     }
 
     /**
@@ -46,21 +47,21 @@ public final class HangulUtils {
      */
     public static List<Character> disassembleToList(final String text) {
         return text.chars()
-                .mapToObj(unicodeValue -> (char) unicodeValue)
                 .flatMap(HangulUtils::disassembleHangulCharacterToStream)
+                .mapToObj(codePoint -> (char) codePoint)
                 .collect(toList());
     }
 
-    public static List<Character> disassembleToList(final char unicodeValue) {
-        return disassembleHangulCharacterToStream(unicodeValue)
+    public static List<Character> disassembleToList(final char codePoint) {
+        return disassembleHangulCharacterToStream(codePoint)
+                .mapToObj(cp -> (char) cp)
                 .collect(toList());
     }
 
     public static CharSequence disassembleToCharSequence(final String text) {
         return text.chars()
-                .mapToObj(unicodeValue -> (char) unicodeValue)
                 .flatMap(HangulUtils::disassembleHangulCharacterToStream)
-                .map(Object::toString)
+                .mapToObj(codePoint -> String.valueOf((char) codePoint))
                 .collect(joining());
     }
 
@@ -105,8 +106,7 @@ public final class HangulUtils {
             return false;
         }
 
-        return HangulComponent.of(unicode)
-                .isEndsWithConsonant();
+        return HangulComponent.of(unicode).isEndsWithConsonant();
     }
 
     /**
@@ -119,7 +119,7 @@ public final class HangulUtils {
      * @return 주어진 {@code unicode}가 자음으로 끝나는지 여부
      */
     public static boolean isEndsWithConsonantWithLatin(final char unicode) {
-        if (Alphabet.isAlphabet(unicode) && Alphabet.isConsonant(unicode)) {
+        if (isAlphabet(unicode) && Alphabet.isConsonant(unicode)) {
             return true;
         }
         return isEndsWithConsonant(unicode);
@@ -145,11 +145,15 @@ public final class HangulUtils {
      * e.g) 한 -> {@code true}, ㅚ -> {@code false}, a -> {@code false}
      * </p>
      *
-     * @param unicode 판단할 문자
+     * @param codePoint 판단할 문자
      * @return 주어진 {@code unicode}가 완성형 한글인지 반환
      */
-    public static boolean isCompleteHangulInUnicode(final char unicode) {
-        return HangulComponent.isCompleteHangulInUnicode(unicode);
+    public static boolean isCompleteHangulInUnicode(final char codePoint) {
+        return HangulComponent.isCompleteHangulInUnicode(codePoint);
+    }
+
+    public static boolean isCompleteHangulInUnicode(final int codePoint) {
+        return isCompleteHangulInUnicode((char) codePoint);
     }
 
     /**
@@ -186,15 +190,14 @@ public final class HangulUtils {
     }
 
 
-    private static Stream<Character> disassembleHangulCharacterToStream(final char unicodeValue) {
-        if (!isCompleteHangulInUnicode(unicodeValue)) {
-            return Stream.of(unicodeValue);
+    private static IntStream disassembleHangulCharacterToStream(final int codePoint) {
+        if (!isCompleteHangulInUnicode(codePoint)) {
+            return IntStream.of(codePoint);
         }
 
-        return HangulComponent.of(unicodeValue)
+        return HangulComponent.of(codePoint)
                 .toCharSequence()
-                .chars()
-                .mapToObj(integer -> (char) integer);
+                .chars();
     }
 
     private HangulUtils() {

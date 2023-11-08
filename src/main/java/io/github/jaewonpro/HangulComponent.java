@@ -10,17 +10,17 @@ final class HangulComponent implements Comparable<HangulComponent> {
 
     private static final char EMPTY_CHAR = '-';
 
-    private final static char[] BEGIN_LIST = { // 초성
+    private static final char[] BEGIN_LIST = { // 초성
             'ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ',
             'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'
     };
 
-    private final static char[] MIDDLE_LIST = { // 중성
+    private static final char[] MIDDLE_LIST = { // 중성
             'ㅏ', 'ㅐ', 'ㅑ', 'ㅒ', 'ㅓ', 'ㅔ', 'ㅕ', 'ㅖ', 'ㅗ', 'ㅘ',
             'ㅙ', 'ㅚ', 'ㅛ', 'ㅜ', 'ㅝ', 'ㅞ', 'ㅟ', 'ㅠ', 'ㅡ', 'ㅢ', 'ㅣ'
     };
 
-    private final static char[] END_LIST = { // 종성
+    private static final char[] END_LIST = { // 종성
             EMPTY_CHAR, 'ㄱ', 'ㄲ', 'ㄳ', 'ㄴ', 'ㄵ', 'ㄶ', 'ㄷ', 'ㄹ', 'ㄺ',
             'ㄻ', 'ㄼ', 'ㄽ', 'ㄾ', 'ㄿ', 'ㅀ', 'ㅁ', 'ㅂ', 'ㅄ', 'ㅅ',
             'ㅆ', 'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'
@@ -30,16 +30,19 @@ final class HangulComponent implements Comparable<HangulComponent> {
     private final char middle; // 중성
     private final char end; // 종성
 
-
-    public static HangulComponent of(final char unicodeValue) {
-        if (!isCompleteHangulInUnicode(unicodeValue)) {
-            throw new IllegalArgumentException("올바른 한글이 아닌 unicode 입니다! actual: " + unicodeValue);
+    public static HangulComponent of(final int codePoint) {
+        if (!isCompleteHangulInUnicode(codePoint)) {
+            throw new IllegalArgumentException("올바른 한글이 아닌 unicode 입니다! actual: " + codePoint);
         }
-        return new HangulComponent(unicodeValue);
+        return new HangulComponent(codePoint);
     }
 
     public static boolean isCompleteHangulInUnicode(final char unicode) {
         return HANGUL_UNICODE_BEGIN <= unicode && unicode <= HANGUL_UNICODE_END;
+    }
+
+    public static boolean isCompleteHangulInUnicode(final int codePoint) {
+        return HANGUL_UNICODE_BEGIN <= codePoint && codePoint <= HANGUL_UNICODE_END;
     }
 
 
@@ -94,32 +97,12 @@ final class HangulComponent implements Comparable<HangulComponent> {
             .comparing(h -> h.end);
 
 
-    public boolean contains(final char unicode) {
-        if (isBeginConsonant(unicode)) {
-            return this.begin == unicode;
-        }
-        if (!isCompleteHangulInUnicode(unicode)) {
-            return false;
-        }
-        return contains(HangulComponent.of(unicode));
-    }
-
-    public boolean contains(final HangulComponent subHangul) {
-        return this.toString().contains(subHangul.toString());
-    }
-
     public boolean isEndsWithConsonant() {
         return end != EMPTY_CHAR;
     }
 
-
-    private boolean isBeginConsonant(final char unicode) {
-        return BEGIN_LIST[0] <= unicode && unicode <= BEGIN_LIST[BEGIN_LIST.length - 1];
-    }
-
-
-    private HangulComponent(final char unicodeValue) {
-        final int difference = unicodeValue - HANGUL_UNICODE_BEGIN;
+    private HangulComponent(final int codePoint) {
+        final int difference = codePoint - HANGUL_UNICODE_BEGIN;
 
         this.begin = BEGIN_LIST[getBeginIndex(difference)];
         this.middle = MIDDLE_LIST[getMiddleIndex(difference)];
