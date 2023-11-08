@@ -2,8 +2,10 @@ import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.params.converter.ArgumentConversionException;
 import org.junit.jupiter.params.converter.ArgumentConverter;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import static java.util.stream.Collectors.toList;
 
 public class SplitByCommaConverter implements ArgumentConverter {
 
@@ -14,17 +16,18 @@ public class SplitByCommaConverter implements ArgumentConverter {
             throw new IllegalArgumentException(
                     "The argument should be a string: " + source);
         }
-        String[] parts = ((String) source).split(", ");
 
-        final List<Character> a = new ArrayList<>();
-        for (String part : parts) {
-            if (part.length() > 1) {
-                throw new IllegalArgumentException("Failed to convert: " + part);
-            }
-
-            a.add(part.charAt(0));
-        }
-
-        return a;
+        String input = (String) source;
+        return convert(input);
     }
+
+    private List<Character> convert(String input) {
+        String[] parts = input.split(", ");
+
+        return Arrays.stream(parts)
+                .filter(part -> part.length() == 1)
+                .map(part -> part.charAt(0))
+                .collect(toList());
+    }
+
 }
