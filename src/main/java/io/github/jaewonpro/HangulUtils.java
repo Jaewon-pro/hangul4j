@@ -65,6 +65,21 @@ public final class HangulUtils {
                 .collect(joining());
     }
 
+    /**
+     * <p>
+     * 쌍자음이나 받침으로 쓰이는 자음도 2개의 자음으로 되어 있다면, 분해한 결과를 반환<br>
+     * e.g. 닭 -> ㄷㅏㄹㄱ
+     * </p>
+     *
+     * @param text 분해할 문자열
+     * @return 분해된 한글 문자열
+     */
+    public static String disassembleAll(final String text) {
+        return text.chars()
+                .flatMap(HangulUtils::disassembleHangulCharacterToStreamAlsoKoreanConsonant)
+                .mapToObj(codePoint -> String.valueOf((char) codePoint))
+                .collect(joining());
+    }
 
     /**
      * 문자열에 다른 문자열이 포함되는지 반환
@@ -81,7 +96,7 @@ public final class HangulUtils {
             return true;
         }
 
-        return disassemble(text).contains(disassemble(substring));
+        return disassembleAll(text).contains(disassembleAll(substring));
     }
 
     /**
@@ -198,6 +213,17 @@ public final class HangulUtils {
         return HangulComponent.of(codePoint)
                 .toCharSequence()
                 .chars();
+    }
+
+    private static IntStream disassembleHangulCharacterToStreamAlsoKoreanConsonant(final int codePoint) {
+        if (!isCompleteHangulInUnicode(codePoint)) {
+            return IntStream.of(codePoint);
+        }
+
+        return HangulComponent.of(codePoint)
+                .toCharSequence()
+                .chars()
+                .flatMap(HangulConsonantMapper::convert);
     }
 
     private HangulUtils() {
